@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>🎄 Christmas Charades</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+margin: 0;
+font-family: "Trebuchet MS", Arial, sans-serif;
+background: linear-gradient(to bottom, #0b6623, #b30000);
+color: white;
+text-align: center;
+overflow-x: hidden;
+}
+
+.container {
+max-width: 520px;
+margin: auto;
+padding: 20px;
+}
+
+h1 { font-size: 32px; }
+
+.charade {
+background: white;
+color: #b30000;
+padding: 30px;
+border-radius: 16px;
+font-size: 24px;
+font-weight: bold;
+margin: 20px 0;
+min-height: 100px;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.row {
+display: flex;
+justify-content: space-between;
+margin: 10px 0;
+}
+
+button {
+flex: 1;
+margin: 5px;
+padding: 14px;
+font-size: 18px;
+border-radius: 12px;
+border: none;
+font-weight: bold;
+cursor: pointer;
+}
+
+.pass { background: #1e90ff; color: white; }
+.correct { background: #32cd32; color: white; }
+.start { background: gold; }
+.stop { background: #ff4c4c; color: white; }
+
+input, textarea {
+width: 100%;
+padding: 8px;
+border-radius: 8px;
+border: none;
+margin-top: 5px;
+}
+
+.scoreboard {
+font-size: 18px;
+margin-top: 10px;
+}
+
+.team {
+font-weight: bold;
+}
+
+footer {
+margin-top: 15px;
+font-size: 14px;
+}
+
+.snow {
+position: fixed;
+top: -10px;
+color: white;
+user-select: none;
+animation: fall linear infinite;
+}
+
+@keyframes fall {
+to { transform: translateY(110vh); }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>🎄 Christmas Charades 🎅</h1>
+
+<div class="row scoreboard">
+<div>⭐ Team A: <span id="scoreA">0</span></div>
+<div>⭐ Team B: <span id="scoreB">0</span></div>
+</div>
+
+<div class="row">
+<div>⏱ <span id="time">60</span>s</div>
+<div class="team">Team: <span id="team">A</span></div>
+</div>
+
+<div class="charade" id="charade">Press Start</div>
+
+<div class="row">
+<button class="pass" onclick="pass()">Pass</button>
+<button class="correct" onclick="correct()">Correct</button>
+</div>
+
+<div class="row">
+<input type="number" id="timerInput" value="60" min="10">
+<button class="start" onclick="start()">Start</button>
+<button class="stop" onclick="stop()">Stop</button>
+</div>
+
+<h3>Edit Charades</h3>
+<textarea id="customList" rows="5">
+Decorating the Christmas tree
+Untangling Christmas lights
+Santa stuck in the chimney
+Building a snowman
+Drinking hot chocolate
+Wrapping presents
+Wearing an ugly Christmas sweater
+</textarea>
+<button class="start" onclick="loadCustom()">Update List</button>
+
+<footer>
+❄️ Full-screen your browser • 🎉 Share link • 🎁 Have fun
+</footer>
+</div>
+
+<audio id="correctSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_7bba8b7a1f.mp3"></audio>
+<audio id="passSound" src="https://cdn.pixabay.com/download/audio/2022/03/10/audio_7a5d0a7efb.mp3"></audio>
+<audio id="endSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_74e5a5cde0.mp3"></audio>
+
+<script>
+let charades = [];
+let timer;
+let timeLeft = 60;
+let team = "A";
+let scores = { A: 0, B: 0 };
+
+function snow() {
+const s = document.createElement("div");
+s.className = "snow";
+s.textContent = "❄";
+s.style.left = Math.random() * 100 + "vw";
+s.style.fontSize = Math.random() * 20 + 10 + "px";
+s.style.animationDuration = Math.random() * 5 + 5 + "s";
+document.body.appendChild(s);
+setTimeout(() => s.remove(), 10000);
+}
+setInterval(snow, 300);
+
+function randomCharade() {
+return charades[Math.floor(Math.random() * charades.length)];
+}
+
+function next() {
+document.getElementById("charade").textContent = randomCharade();
+}
+
+function pass() {
+document.getElementById("passSound").play();
+next();
+}
+
+function correct() {
+document.getElementById("correctSound").play();
+scores[team]++;
+document.getElementById("score" + team).textContent = scores[team];
+team = team === "A" ? "B" : "A";
+document.getElementById("team").textContent = team;
+next();
+}
+
+function start() {
+loadCustom();
+timeLeft = +document.getElementById("timerInput").value;
+document.getElementById("time").textContent = timeLeft;
+next();
+clearInterval(timer);
+timer = setInterval(() => {
+timeLeft--;
+document.getElementById("time").textContent = timeLeft;
+if (timeLeft <= 0) {
+clearInterval(timer);
+document.getElementById("endSound").play();
+document.getElementById("charade").textContent = "🎉 Round Over!";
+}
+}, 1000);
+}
+
+function stop() {
+clearInterval(timer);
+document.getElementById("charade").textContent = "⏹ Stopped";
+}
+
+function loadCustom() {
+charades = document.getElementById("customList").value
+.split("\n")
+.map(c => c.trim())
+.filter(Boolean);
+}
+</script>
+
+</body>
+</html>
